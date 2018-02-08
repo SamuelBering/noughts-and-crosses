@@ -5,7 +5,7 @@ class GameEngine {
         this.gameBoard = this.gameBoardRenderer.gameBoard;
         this.mapPlayers(this.gameBoardRenderer.playerRenderes);
         this.currentPlayerIndex = 0;
-        this.turns=0;
+        this.turns = 0;
     }
 
     mapPlayers(playerRenderes) {
@@ -19,18 +19,27 @@ class GameEngine {
     }
 
 
-    run(){
-        this.gameBoardRenderer.onClick=this.executeRound.bind(this);
+    run() {
+        this.gameBoardRenderer.Render();
+        this.gameBoardRenderer.onClick = this.executeRound.bind(this);
     }
 
-    executeRound(col, row){
-        this.currentPlayerIndex=this.turns % this.players.length;
+    executeRound(col, row) {
+        this.currentPlayerIndex = this.turns % this.players.length;
 
-        console.log("currentplayer: "+this.currentPlayerIndex+"  "+col+"  "+row);
+        let cellContent = this.gameBoard.getSymbol(col, row);
+        if ((cellContent) != "")
+            return;
+
+        this.gameBoard.setSymbol(col, row, this.players[this.currentPlayerIndex].symbol);
+
+        this.gameBoardRenderer.RenderCell(col, row);
+
+        console.log("currentplayer: " + this.currentPlayerIndex + "  " + col + "  " + row);
 
         this.turns++;
 
     }
-    
+
 
 }
