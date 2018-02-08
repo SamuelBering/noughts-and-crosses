@@ -1,7 +1,8 @@
 class GameEngine {
 
-    constructor(gameBoardRenderer) {
+    constructor(gameBoardRenderer, endGameCallbackFunc) {
         this.gameBoardRenderer = gameBoardRenderer;
+        this.endGameCallbackFunc = endGameCallbackFunc;
         this.gameBoard = this.gameBoardRenderer.gameBoard;
         this.mapPlayers(this.gameBoardRenderer.playerRenderes);
         this.currentPlayerIndex = 0;
@@ -18,15 +19,20 @@ class GameEngine {
         this.players = players;
     }
 
+    showPlayerInfo() {
+        let name=this.players[this.currentPlayerIndex].name;
+        let symbol=this.players[this.currentPlayerIndex].symbol;
+        this.gameBoardRenderer.showMessage(`Spelare: <strong>${name} (${symbol})</strong>`);
+    }
 
     run() {
         this.gameBoardRenderer.Render();
+        this.showPlayerInfo();
         this.gameBoardRenderer.onClick = this.executeRound.bind(this);
     }
 
     executeRound(col, row) {
-        this.currentPlayerIndex = this.turns % this.players.length;
-
+        
         let cellContent = this.gameBoard.getSymbol(col, row);
         if ((cellContent) != "")
             return;
@@ -35,10 +41,41 @@ class GameEngine {
 
         this.gameBoardRenderer.RenderCell(col, row);
 
-        console.log("currentplayer: " + this.currentPlayerIndex + "  " + col + "  " + row);
+        if (this.hasWon(this.players[this.currentPlayerIndex], col, row)) {
+            this.players[this.currentPlayerIndex].hasWon = true;
+            this.endGame({
+                player: this.players[this.currentPlayerIndex],
+                status: "won"
+            });
+            return;
+        }
+
+        if (this.turns == (this.gameBoard.cols * this.gameBoard.rows) - 1) {
+            this.endGame({
+                status: "even"
+            });
+            return;
+        }
 
         this.turns++;
+        this.currentPlayerIndex = this.turns % this.players.length;   
+        this.showPlayerInfo();
+    }
 
+    hasWon(player, col, row) {
+        let symbolsCount = this.gameBoard.countSymbolsAllDirections(player.symbol, col, row);
+
+        console.log(`Player ${player.symbol} has ${symbolsCount} symbols`);
+
+        if (symbolsCount > 4)
+            return true;
+        else
+            return false;
+    }
+
+    endGame(status) {
+        this.gameBoardRenderer.onClick = undefined;
+        this.endGameCallbackFunc(status);
     }
 
 

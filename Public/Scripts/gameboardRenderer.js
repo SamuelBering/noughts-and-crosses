@@ -1,12 +1,17 @@
 class GameBoardRenderer {
 
-    constructor(gameBoard, playerRenderes, canvas) {
+    constructor(gameBoard, playerRenderes, canvas, statusDiv) {
         this.gameBoard = gameBoard;
         this.MapPlayerRenderes(playerRenderes);
         this.canvas = canvas;
+        this.statusDiv = statusDiv;
         this.canvas.addEventListener('click', this._onClick.bind(this), false);
         this.rowHeight = (this.canvas.height - 4) / this.gameBoard.rows;
         this.colWidth = (this.canvas.width - 4) / this.gameBoard.cols;
+    }
+
+    showMessage(html) {
+        this.statusDiv.innerHTML = html;
     }
 
     MapPlayerRenderes(playerRenderes) {
