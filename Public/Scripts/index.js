@@ -28,7 +28,23 @@ function startGame(container, cols, rows, playerNames) {
     let gameBoardRenderer = new GameBoardRenderer(gameBoard, playerRenderes, canvas, statusContainer);
 
     let gameEngine = new GameEngine(gameBoardRenderer, (status) => {
-        console.log(status);
+        setTimeout(() => {
+            let message = "";
+
+            if (status.status == "won")
+                message = `Grattis ${status.player.name} du har vunnit!!`;
+            else
+                message = "Oavgjort...";
+            message += "Spela igen ? (OK)";
+
+            if (confirm(message)) {
+                container.innerHTML = "";
+                startGame(container, cols, rows, playerNames);
+            }
+            else {
+                container.innerHTML = "<p>Tack för den här gången!</p>"
+            }
+        }, 100);
     });
 
     gameEngine.run();
@@ -43,9 +59,10 @@ function insertAfter(el, referenceNode) {
 }
 
 
-function getUsers(container) {
-    let frm = "<form onsubmit='return false' id='playersForm'><label>Kolumner: <input required type='number' name='cols'/></label><br/>"
-        + "<label>Rader: <input required type='number' name='rows'/></label><br/>"
+function getUsers(container, callbackFunc) {
+    let frm = "<form onsubmit='return false' id='playersForm'><label for='cols'>Kolumner: </label>"
+        + "<input min='5' max='45' required type='number' id='cols' name='cols'/><br/>"
+        + "<label for='rows'>Rader: </label><input min='5' max='45' required type='number' id='rows' name='rows'/><br/>"
         + "<label>Spelare 1: <input required name='players' type='text' /></label><br/>"
         + "<label>Spelare 2: <input required name='players' type='text' /></label><br/>"
         + "<button id='addPlayer'>+</button><br/>"
@@ -61,6 +78,7 @@ function getUsers(container) {
 
         let label = document.createElement("label");
         let input = document.createElement("input");
+        input.setAttribute("required", "");
         let br = document.createElement("br");
         input.type = "text";
         input.name = "players";
@@ -71,33 +89,27 @@ function getUsers(container) {
         insertAfter(br, label);
     });
 
-    let playBtn=document.getElementById("playBtn");
+    let form = document.getElementById("playersForm");
+    form.addEventListener("submit", (e) => {
 
-    playBtn.addEventListener("click",(e)=>{
-        
         let form = document.getElementById("playersForm");
-        let cols=form.elements.namedItem("cols").value;
-        let rows=form.elements.namedItem("rows").value;
-        let playerNamesArray = form.elements.namedItem("players");
-
-        if (cols!="" && rows!="" && playerNamesArray[0].value!="" && playerNamesArray[1].value!="")
-        {
-            console.log("continue");
-        }
-
+        let cols = form.elements.namedItem("cols").value;
+        let rows = form.elements.namedItem("rows").value;
+        let playersNodeList = form.elements.namedItem("players");
+        let playerNamesList = Array.from(playersNodeList).map(i => i.value);
+        let container = document.getElementById("container");
+        container.innerHTML = "";
+        callbackFunc(cols, rows, playerNamesList);
     });
 
 }
 
 (function () {
 
-
     let container = document.getElementById("container");
-    getUsers(container);
-    // let cols = 10, rows = 10;
-    // let playerNames = ['Samuel', 'Andreas', 'Henrik', "Fredrik", "Gustav"];
-
-    // startGame(container, cols, rows, playerNames);
+    getUsers(container, (cols, rows, playerNamesList) => {
+        startGame(container, cols, rows, playerNamesList);
+    });
 
 })();
 
